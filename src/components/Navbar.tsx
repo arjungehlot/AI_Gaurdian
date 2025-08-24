@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Menu, X } from 'lucide-react';
@@ -14,6 +14,7 @@ const Navbar = () => {
     { name: 'Features', href: '#features' },
     { name: 'Pricing', href: '/pricing' },
     { name: 'Docs', href: '/docs' },
+    { name: 'Chat', href: '/chat' },
   ];
 
   return (

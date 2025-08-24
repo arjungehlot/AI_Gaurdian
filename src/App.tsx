@@ -1,13 +1,14 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
+// import SignupPage from './pages/SignupPage';
 import PricingPage from './pages/PricingPage';
 import ApiDocsPage from './pages/ApiDocsPage';
 import DashboardPage from './pages/DashboardPage';
-import Navbar from './components/Navbar';
+// import AIChat from './pages/Chatbot';
+import AIGuardianChatDemo from './pages/Chatbot';
+
 
 function App() {
   return (
@@ -16,9 +17,10 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          {/* <Route path="/signup" element={<SignupPage />} /> */}
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/docs" element={<ApiDocsPage />} />
+          <Route path="/chat" element={<AIGuardianChatDemo />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
         </Routes>
       </div>
