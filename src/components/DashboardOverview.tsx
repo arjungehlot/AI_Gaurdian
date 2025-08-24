@@ -1,12 +1,9 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Shield,
   AlertTriangle,
   CheckCircle,
   TrendingUp,
   Eye,
-  BarChart3,
   Clock,
   Users
 } from 'lucide-react';

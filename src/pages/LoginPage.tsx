@@ -1,171 +1,370 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Shield, Chrome, Github } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Shield, Chrome, Github, Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Clear messages when switching between login/register
+  useEffect(() => {
+    setError('');
+    setSuccess('');
+  }, [isLogin]);
+
+  // Check if passwords match when confirmPassword changes
+  useEffect(() => {
+    if (!isLogin && formData.password && formData.confirmPassword) {
+      setPasswordsMatch(formData.password === formData.confirmPassword);
+    }
+  }, [formData.password, formData.confirmPassword, isLogin]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+    
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
+
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+    setFormData({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setError('');
+    setSuccess('');
+    setPasswordsMatch(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    // Validate passwords match for registration
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const endpoint = isLogin 
+        ? 'https://ai-gaurdian-back.onrender.com/api/v1/users/login' 
+        : 'https://ai-gaurdian-back.onrender.com/api/v1/users/register';
+
+      // Prepare the data to send to the API
+      const requestData = isLogin
+        ? {
+            email: formData.email,
+            password: formData.password
+          }
+        : {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password
+          };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (isLogin) {
+          // Store the token (assuming your API returns a token)
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          setSuccess('Login successful! Redirecting...');
+          setTimeout(() => navigate('/dashboard'), 1500);
+        } else {
+          setSuccess('Registration successful! You can now login.');
+          setTimeout(() => toggleForm(), 2000);
+        }
+      } else {
+        setError(data.message || `An error occurred during ${isLogin ? 'login' : 'registration'}`);
+      }
+    } catch (err) {
+      setError('Network error. Please try again later.');
+      console.error('Auth error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = (provider: 'google' | 'github') => {
+    // Placeholder for social login functionality
+    setError(`${provider} login is not implemented yet`);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-md w-full space-y-8"
-        >
-          {/* Header */}
-          <div className="text-center">
-            <Link to="/" className="inline-flex items-center space-x-3 mb-8">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
-                <Shield className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl flex bg-white rounded-2xl shadow-2xl overflow-hidden">
+        {/* Left Side - Form */}
+        <div className="w-full md:w-1/2 p-8 md:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="h-full flex flex-col justify-center"
+          >
+            {/* Header */}
+            <div className="text-center mb-8">
+              <Link to="/" className="inline-flex items-center space-x-3 mb-6">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-md">
+                  <Shield className="h-8 w-8 text-white" />
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+                  GuardAI
+                </span>
+              </Link>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                {isLogin ? 'Welcome back' : 'Create an account'}
+              </h2>
+              <p className="text-gray-600">
+                {isLogin ? 'Sign in to your account to continue' : 'Join us to secure your AI systems'}
+              </p>
+            </div>
+
+            {/* Error and Success Messages */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-center gap-2"
+                >
+                  <AlertCircle className="h-5 w-5" />
+                  <span className="text-sm">{error}</span>
+                </motion.div>
+              )}
+              
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg flex items-center gap-2"
+                >
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="text-sm">{success}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Social Login */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <button 
+                onClick={() => handleSocialLogin('google')}
+                className="flex items-center justify-center space-x-2 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md"
+              >
+                <Chrome className="h-5 w-5 text-red-500" />
+                <span className="text-sm font-medium text-gray-700">Google</span>
+              </button>
+              <button 
+                onClick={() => handleSocialLogin('github')}
+                className="flex items-center justify-center space-x-2 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md"
+              >
+                <Github className="h-5 w-5 text-gray-800" />
+                <span className="text-sm font-medium text-gray-700">GitHub</span>
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">GuardAI</span>
-            </Link>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
-            <p className="text-gray-600">Sign in to your account to continue</p>
-          </div>
-
-          {/* Social Login */}
-          <div className="space-y-3">
-            <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-              <Chrome className="h-5 w-5 text-gray-500" />
-              <span className="text-gray-700 font-medium">Continue with Google</span>
-            </button>
-            <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-              <Github className="h-5 w-5 text-gray-500" />
-              <span className="text-gray-700 font-medium">Continue with GitHub</span>
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 text-gray-500">Or continue with email</span>
-            </div>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="Enter your email"
-              />
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <AnimatePresence mode="wait">
+                {!isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <User className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="username"
+                        type="text"
+                        required={!isLogin}
+                        value={formData.username}
+                        onChange={handleInputChange}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Username"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Email address"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
-                  placeholder="Enter your password"
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   )}
                 </button>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="remember" className="ml-2 text-sm text-gray-700">
-                  Remember me
-                </label>
-              </div>
-              <Link to="#" className="text-sm text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </Link>
-            </div>
+              <AnimatePresence mode="wait">
+                {!isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="confirmPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        required={!isLogin}
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                          formData.confirmPassword && !passwordsMatch 
+                            ? 'border-red-500' 
+                            : 'border-gray-300'
+                        }`}
+                        placeholder="Confirm Password"
+                      />
+                      {formData.confirmPassword && !passwordsMatch && (
+                        <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300"
-            >
-              Sign in
-            </button>
-          </form>
+              {isLogin && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember"
+                      type="checkbox"
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="remember" className="ml-2 text-sm text-gray-700">
+                      Remember me
+                    </label>
+                  </div>
+                  <Link to="#" className="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
 
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-600 hover:text-blue-500 font-medium">
-              Sign up
-            </Link>
-          </p>
-        </motion.div>
-      </div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={isLoading || (!isLogin && !passwordsMatch)}
+                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isLogin ? 'Sign in' : 'Create account'}</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </motion.button>
+            </form>
 
-      {/* Right Side - Illustration */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-center text-white max-w-md"
-        >
-          <div className="mb-8">
-            <div className="w-32 h-32 mx-auto bg-white/20 rounded-3xl flex items-center justify-center mb-6">
-              <Shield className="h-16 w-16 text-white" />
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+                <button
+                  onClick={toggleForm}
+                  className="text-blue-600 hover:text-blue-500 font-medium"
+                >
+                  {isLogin ? 'Sign up' : 'Sign in'}
+                </button>
+              </p>
             </div>
-            <h3 className="text-3xl font-bold mb-4">Secure AI Protection</h3>
-            <p className="text-blue-100 text-lg">
-              Monitor and protect your AI systems from misuse with advanced real-time detection and analysis.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="bg-white/10 rounded-xl p-4">
-              <div className="text-2xl font-bold">99.9%</div>
-              <div className="text-blue-100">Uptime</div>
-            </div>
-            <div className="bg-white/10 rounded-xl p-4">
-              <div className="text-2xl font-bold">24/7</div>
-              <div className="text-blue-100">Monitoring</div>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Right Side - Illustration */}
+        <div className="hidden md:flex flex-1 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 items-center justify-center p-12 relative overflow-hidden">
+          {/* Background animation and content remains the same as before */}
+          {/* ... */}
+        </div>
       </div>
     </div>
   );

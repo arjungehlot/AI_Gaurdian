@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   Shield,
   LayoutDashboard,
@@ -12,16 +11,37 @@ import {
   Search,
   User,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+interface UserData {
+  username: string;
+  email: string;
+  role?: string;
+  // Add other user properties as needed
+}
+
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const location = useLocation();
+
+  // Get user data from localStorage on component mount
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      try {
+        setUserData(JSON.parse(user));
+      } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+      }
+    }
+  }, []);
 
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -30,6 +50,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Reports', href: '/dashboard/reports', icon: FileText },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
+
+  const handleLogout = () => {
+    // Remove user data from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    
+    // Redirect to login page
+    window.location.href = '/';
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -52,6 +81,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <X className="h-6 w-6" />
               </button>
             </div>
+            
+            {/* User info in mobile sidebar */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {userData?.username || 'User'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {userData?.role || 'Member'}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <nav className="flex-1 px-6 py-6 space-y-2">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
@@ -71,6 +118,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   </Link>
                 );
               })}
+              
+              {/* Logout button in mobile sidebar */}
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                <LogOut className="h-5 w-5 text-gray-500" />
+                <span className="font-medium">Logout</span>
+              </button>
             </nav>
           </div>
         </div>
@@ -87,6 +143,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <span className="text-xl font-bold text-gray-900">GuardAI</span>
             </div>
           </div>
+          
+          {/* User info in desktop sidebar */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <User className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {userData?.username || 'User'}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {userData?.role || 'Member'}
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <nav className="flex-1 px-6 py-6 space-y-2">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
@@ -105,6 +179,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </Link>
               );
             })}
+            
+            {/* Logout button in desktop sidebar */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-all mt-4"
+            >
+              <LogOut className="h-5 w-5 text-gray-500" />
+              <span className="font-medium">Logout</span>
+            </button>
           </nav>
         </div>
       </div>
@@ -138,13 +221,40 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 3
               </span>
             </button>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
+            
+            {/* User profile with dropdown */}
+            <div className="relative group">
+              <div className="flex items-center space-x-3 cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div className="hidden sm:block">
+                  <div className="text-sm font-medium text-gray-900">
+                    {userData?.username || 'User'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {userData?.role || 'Member'}
+                  </div>
+                </div>
               </div>
-              <div className="hidden sm:block">
-                <div className="text-sm font-medium text-gray-900">John Doe</div>
-                <div className="text-xs text-gray-500">Admin</div>
+              
+              {/* Dropdown menu */}
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <div className="text-sm font-medium text-gray-900">
+                    {userData?.username || 'User'}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {userData?.email || ''}
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </button>
               </div>
             </div>
           </div>

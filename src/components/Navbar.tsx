@@ -25,7 +25,7 @@ const Navbar = () => {
             <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
               <Shield className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">GuardAI</span>
+            <span className="text-xl font-bold text-gray-900">AIGaurdian</span>
           </Link>
 
           {/* Desktop Navigation */}
