@@ -17,7 +17,6 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          {/* <Route path="/signup" element={<SignupPage />} /> */}
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/docs" element={<ApiDocsPage />} />
           <Route path="/chat" element={<AIGuardianChatDemo />} />

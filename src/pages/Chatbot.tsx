@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Send, RefreshCw, Database, BarChart, Zap, X, CheckCircle, XCircle } from 'lucide-react';
+import { Send, RefreshCw, Database, BarChart, Zap, X, CheckCircle, XCircle } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -131,10 +131,8 @@ Return ONLY a valid JSON object with this structure:
     "emoji": "😊 | 😢 | 😡 | 😕 | 😨 | 😐 | 🤩 | 😤" 
   }
 }
-
 User Input: "${text}"
 `;
-
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apikey}`,

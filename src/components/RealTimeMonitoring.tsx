@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -9,12 +9,66 @@ import {
   Clock,
   Eye
 } from 'lucide-react';
-import { realTimeQueries } from '../data/dashboardData';
 
 const RealTimeMonitoring = () => {
-  const [queries, setQueries] = useState(realTimeQueries);
+  const [queries, setQueries] = useState<any[]>([]);
   const [filter, setFilter] = useState('all');
   const [isLive, setIsLive] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch queries from API
+  const fetchQueries = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("https://aigaurdian.onrender.com/api/records");
+      const json = await res.json();
+      if (json.success) {
+        // Map API response into your UI query format
+        const mapped = json.data.map((item: any) => ({
+          id: item._id,
+          query: item.prompt,
+          riskLevel: item.severity >= 7 ? "high" : item.severity >= 4 ? "medium" : "low",
+          timestamp: item.createdAt,
+          flagged: item.safety === "unsafe",
+          confidence: Math.max(0.5, 1 - item.severity / 10), // fake confidence based on severity
+          emotion: item.emotion?.type || "neutral"
+        }));
+        setQueries(mapped.reverse()); // newest first
+      }
+    } catch (error) {
+      console.error("Failed to fetch queries:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch + refresh every 10s when live
+  useEffect(() => {
+    fetchQueries();
+    if (!isLive) return;
+
+    const interval = setInterval(() => {
+      fetchQueries();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [isLive]);
+
+  // Filtering logic
+  const filteredQueries = queries.filter(query => {
+    switch (filter) {
+      case 'flagged':
+        return query.flagged;
+      case 'safe':
+        return !query.flagged;
+      case 'high-risk':
+        return query.riskLevel === 'high';
+      case 'medium-risk':
+        return query.riskLevel === 'medium';
+      default:
+        return true;
+    }
+  });
 
   const getRiskBadge = (riskLevel: string) => {
     switch (riskLevel) {
@@ -46,42 +100,6 @@ const RealTimeMonitoring = () => {
     }
   };
 
-  const filteredQueries = queries.filter(query => {
-    switch (filter) {
-      case 'flagged':
-        return query.flagged;
-      case 'safe':
-        return !query.flagged;
-      case 'high-risk':
-        return query.riskLevel === 'high';
-      case 'medium-risk':
-        return query.riskLevel === 'medium';
-      default:
-        return true;
-    }
-  });
-
-  // Simulate real-time updates
-  useEffect(() => {
-    if (!isLive) return;
-
-    const interval = setInterval(() => {
-      const newQuery = {
-        id: Date.now(),
-        query: "Sample real-time query...",
-        riskLevel: Math.random() > 0.8 ? 'high' : Math.random() > 0.5 ? 'medium' : 'low',
-        timestamp: new Date().toISOString(),
-        flagged: Math.random() > 0.7,
-        confidence: 0.7 + Math.random() * 0.3,
-        emotion: ['neutral', 'positive', 'curious'][Math.floor(Math.random() * 3)]
-      };
-
-      setQueries(prev => [newQuery, ...prev.slice(0, 19)]);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isLive]);
-
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -102,8 +120,11 @@ const RealTimeMonitoring = () => {
             <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
             <span>{isLive ? 'Live' : 'Paused'}</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">
-            <RefreshCw className="h-4 w-4" />
+          <button 
+            onClick={fetchQueries}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -196,7 +217,12 @@ const RealTimeMonitoring = () => {
           <h2 className="text-xl font-semibold text-gray-900">Live Query Feed</h2>
         </div>
         <div className="max-h-[600px] overflow-y-auto">
-          {filteredQueries.length === 0 ? (
+          {loading ? (
+            <div className="p-12 text-center">
+              <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-500">Fetching live data...</p>
+            </div>
+          ) : filteredQueries.length === 0 ? (
             <div className="p-12 text-center">
               <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">No queries match your current filter</p>

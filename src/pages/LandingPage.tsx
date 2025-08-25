@@ -1,26 +1,23 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
   Shield, 
   Eye, 
   BarChart3, 
-  Zap, 
   CheckCircle, 
   ArrowRight,
   Sparkles,
   Brain,
   AlertTriangle,
-  Users
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 const LandingPage = () => {
-  const fadeInUp = {
-    initial: { opacity: 0, y: 60 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
-  };
+  // const fadeInUp = {
+  //   initial: { opacity: 0, y: 60 },
+  //   animate: { opacity: 1, y: 0 },
+  //   transition: { duration: 0.6, ease: "easeOut" }
+  // };
 
   const features = [
     {
@@ -65,7 +62,11 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="pt-24 pb-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <motion.div {...fadeInUp}>
+          <motion.div 
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             <div className="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full mb-8">
               <Sparkles className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium text-blue-700">Next-generation AI Safety</span>
@@ -289,7 +290,7 @@ const LandingPage = () => {
               Join thousands of companies protecting their AI systems with GuardAI
             </p>
             <Link
-              to="/signup"
+              to="/chat"
               className="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-lg transition-all duration-300 inline-flex items-center space-x-2"
             >
               <span>Start Free Trial</span>

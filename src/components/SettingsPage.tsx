@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Key,
   Bell,
   Shield,
   User,
-  Globe,
   Sliders,
   Eye,
   EyeOff,
