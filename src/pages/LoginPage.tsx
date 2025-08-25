@@ -360,9 +360,44 @@ const LoginPage = () => {
           </motion.div>
         </div>
 
-        {/* Right Side - Illustration */}
-        <div className="hidden md:flex flex-1 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 items-center justify-center p-12 relative overflow-hidden">
-          {/* Background animation and content remains the same as before */}
+     {/* Right Side - Illustration */}
+<div className="hidden md:flex flex-1 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 items-center justify-center p-12 relative overflow-hidden">
+  {/* Background pattern */}
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute inset-0" style={{
+      backgroundImage: `radial-gradient(circle at 25px 25px, white 2%, transparent 50%),
+                        radial-gradient(circle at 75px 75px, white 2%, transparent 50%)`,
+      backgroundSize: '100px 100px'
+    }}></div>
+  </div>
+  
+  {/* Floating elements */}
+  <div className="absolute top-20 left-20 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
+  <div className="absolute bottom-20 right-20 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+  
+  {/* Main illustration image */}
+  <div className="relative z-10">
+    <img 
+      src="https://courses.iid.org.in/public/frontend/images/register.png" 
+      alt="AI Security Illustration"
+      className="w-full max-w-md rounded-xl"
+      onError={(e) => {
+        const img = e.target as HTMLImageElement;
+        img.style.display = 'none';
+        // Fallback content if image fails to load
+        if (img.nextSibling && (img.nextSibling as HTMLElement).style) {
+          (img.nextSibling as HTMLElement).style.display = 'flex';
+        }
+      }}
+    />
+    
+    {/* Fallback content if image fails to load */}
+    <div className="hidden flex-col items-center justify-center text-center text-white">
+      <Shield className="h-24 w-24 mb-6 opacity-80" />
+      <h3 className="text-2xl font-bold mb-2">AI Security</h3>
+      <p className="opacity-80">Advanced protection against AI misuse</p>
+    </div>
+  </div>
           {/* ... */}
         </div>
       </div>
