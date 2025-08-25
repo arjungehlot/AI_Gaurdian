@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, RefreshCw, Database, BarChart, Zap, X, CheckCircle, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -296,6 +297,14 @@ User Input: "${text}"
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
       <div className="relative w-full max-w-4xl">
+        
+         <Link 
+      to="/"
+      className="inline-flex mb-7 items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-indigo-700 font-medium"
+    >
+      ← Back to Home
+    </Link>
+        
         {/* Stats Panel */}
         <AnimatePresence>
           {showStats && (
@@ -503,6 +512,7 @@ User Input: "${text}"
             </div>
           </div>
         </motion.div>
+         
       </div>
     </div>
   );

@@ -134,14 +134,14 @@ const ReportsPage = () => {
             <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-blue-50 rounded-xl">
               <Eye className="h-6 w-6 text-blue-500" />
             </div>
-            <p className="text-2xl font-bold text-gray-900">45,672</p>
+            <p className="text-2xl font-bold text-gray-900">12</p>
             <p className="text-sm text-gray-600">Total Queries Analyzed</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-red-50 rounded-xl">
               <AlertTriangle className="h-6 w-6 text-red-500" />
             </div>
-            <p className="text-2xl font-bold text-red-600">892</p>
+            <p className="text-2xl font-bold text-red-600">5</p>
             <p className="text-sm text-gray-600">Flagged Queries</p>
           </div>
           <div className="text-center">

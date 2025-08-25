@@ -1,8 +1,8 @@
 // Sample data for dashboard
 export const dashboardStats = {
-  totalQueries: 45672,
-  flaggedQueries: 892,
-  safeQueries: 44780,
+  totalQueries: 12,
+  flaggedQueries: 5,
+  safeQueries: 7,
   averageRiskScore: 0.23
 };
 

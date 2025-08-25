@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Shield,
   LayoutDashboard,
@@ -12,7 +12,9 @@ import {
   User,
   Menu,
   X,
-  LogOut
+  LogOut,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -30,6 +32,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Get user data from localStorage on component mount
   useEffect(() => {
@@ -49,6 +52,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Reports', href: '/dashboard/reports', icon: FileText },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    { name: 'Home', href: '/', icon: Home },
   ];
 
   const handleLogout = () => {
@@ -59,6 +63,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     // Redirect to login page
     window.location.href = '/';
   };
+
+  // Check if current page is not the dashboard overview
+  const isNotOverviewPage = location.pathname !== '/dashboard';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -196,12 +203,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <div className="lg:ml-72">
         {/* Top bar */}
         <div className="flex h-16 items-center justify-between bg-white border-b border-gray-200 px-4 lg:px-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-gray-400 hover:text-gray-600 lg:hidden"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 text-gray-400 hover:text-gray-600 lg:hidden mr-2"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+
+            {/* Back Button - Only show on non-overview pages */}
+            {isNotOverviewPage && (
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors mr-4"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="text-sm font-medium">Back</span>
+              </button>
+            )}
+          </div>
 
           <div className="flex-1 max-w-lg mx-4">
             <div className="relative">
