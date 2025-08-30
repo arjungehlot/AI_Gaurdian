@@ -151,6 +151,7 @@ const LoginPage = () => {
             </div>
 
             {/* Error and Success Messages */}
+            {/* Error and Success Messages */}
             <AnimatePresence>
               {error && (
                 <motion.div
