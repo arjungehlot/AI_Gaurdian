@@ -15,10 +15,16 @@ const DashboardOverview = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("https://aigaurdian.onrender.com/api/records");
+        const res = await fetch("/api/records");
         const json = await res.json();
-        if (json.success) {
+        console.log("API Response:", json);
+
+        if (json.success && json.data) {
           setRecords(json.data);
+        } else if (Array.isArray(json)) {
+          setRecords(json);
+        } else if (json.records) {
+          setRecords(json.records);
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -30,7 +36,7 @@ const DashboardOverview = () => {
     fetchData();
   }, []);
 
-  // Compute stats dynamically
+  // Compute stats
   const totalQueries = records.length;
   const flaggedQueries = records.filter((r) => r.safety === "unsafe").length;
   const safeQueries = records.filter((r) => r.safety === "safe").length;
@@ -112,6 +118,11 @@ const DashboardOverview = () => {
           </span>
         </div>
       </div>
+
+      {/* Debug JSON Output
+      <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
+        {JSON.stringify(records, null, 2)}
+      </pre> */}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

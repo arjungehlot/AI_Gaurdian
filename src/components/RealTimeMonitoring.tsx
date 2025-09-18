@@ -20,7 +20,7 @@ const RealTimeMonitoring = () => {
   const fetchQueries = async () => {
     try {
       setLoading(true);
-      const res = await fetch("https://aigaurdian.onrender.com/api/records");
+      const res = await fetch("/api/records");
       const json = await res.json();
       if (json.success) {
         // Map API response into your UI query format

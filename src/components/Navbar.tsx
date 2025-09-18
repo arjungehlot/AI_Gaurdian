@@ -6,7 +6,11 @@ import { Shield, Menu, X, User, LogOut, Settings, LayoutDashboard } from 'lucide
 interface UserData {
   name: string;
   email: string;
+  picture?: string;
+  userData?: string;
 }
+
+// const userData = localStorage.getItem('user');
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,37 +21,66 @@ const Navbar = () => {
   const navigate = useNavigate();
   const isDashboard = location.pathname.startsWith('/dashboard');
 
-  // Check if user is logged in on component mount
+
+  // Check if user is logged in on component mount and on location change
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const userData = localStorage.getItem('user');
-    
-    if (token) {
-      setAccessToken(token);
-    }
-    
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        // Validate that the parsed data has the expected structure
-        if (parsedUser && typeof parsedUser.name === 'string' && typeof parsedUser.email === 'string') {
-          setUser(parsedUser);
-        } else {
-          console.error('Invalid user data structure');
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
+      const userData = localStorage.getItem('user');
+      
+      if (token) {
+        setAccessToken(token);
+      } else {
+        setAccessToken(null);
+      }
+      
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          // Validate that the parsed data has the expected structure
+          if (parsedUser && typeof parsedUser.name === 'string' && typeof parsedUser.email === 'string') {
+            setUser(parsedUser);
+          } else {
+            console.error('Invalid user data structure');
+            localStorage.removeItem('user');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('authToken');
+            setUser(null);
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
           localStorage.removeItem('user');
           localStorage.removeItem('accessToken');
+          localStorage.removeItem('authToken');
+          setUser(null);
         }
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
+      } else {
+        setUser(null);
       }
-    }
-  }, []);
+    };
+
+    // Check auth status on component mount and when location changes
+    checkAuthStatus();
+
+    // Listen for storage changes to update auth status
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user' || e.key === 'accessToken' || e.key === 'authToken') {
+        checkAuthStatus();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [location]); // Re-run when location changes
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('authToken');
     setUser(null);
     setAccessToken(null);
     setUserMenuOpen(false);
@@ -93,7 +126,7 @@ const Navbar = () => {
 
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            {(user && accessToken) ? (
+            {user ? (
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -101,8 +134,8 @@ const Navbar = () => {
                   aria-expanded={userMenuOpen}
                   aria-haspopup="true"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4 text-white" />
+                  <div className="w-8 h-8 flex items-center justify-center">
+                     <img src={user?.picture} alt="profileImage" className='rounded-full'/>
                   </div>
                   <span className="text-gray-700 font-medium">Hey, {user.name.split(' ')[0]}!</span>
                 </button>
@@ -136,7 +169,7 @@ const Navbar = () => {
                       )}
                       
                       <Link
-                        to="/settings"
+                        to="/dashboard/settings"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setUserMenuOpen(false)}
                         role="menuitem"
@@ -209,7 +242,7 @@ const Navbar = () => {
                 
                 <hr className="border-gray-100" />
                 
-                {(user && accessToken) ? (
+                {user ? (
                   <>
                     <div className="px-4 py-2">
                       <p className="text-sm font-medium text-gray-900">Signed in as</p>
