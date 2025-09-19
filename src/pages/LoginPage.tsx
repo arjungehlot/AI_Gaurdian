@@ -78,8 +78,8 @@ const LoginPage = () => {
 
     try {
       const endpoint = isLogin 
-        ? 'http://localhost:5000/api/v1/users/login' 
-        : 'http://localhost:5000/api/v1/users/register';
+        ? 'https://ai-gaurdian-back.onrender.com/api/v1/users/login' 
+        : 'https://ai-gaurdian-back.onrender.com/api/v1/users/register';
 
       const requestData = isLogin
         ? {

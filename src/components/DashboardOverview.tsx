@@ -11,11 +11,13 @@ const DashboardOverview = () => {
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+   const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:6000';
+
   // Fetch API data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/records");
+        const res = await fetch(`${BASE_URL}/api/records`);
         const json = await res.json();
         console.log("API Response:", json);
 

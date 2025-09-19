@@ -16,11 +16,13 @@ const RealTimeMonitoring = () => {
   const [isLive, setIsLive] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:6000';
+
   // Fetch queries from API
   const fetchQueries = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/records");
+      const res = await fetch(`${BASE_URL}/api/records`);
       const json = await res.json();
       if (json.success) {
         // Map API response into your UI query format

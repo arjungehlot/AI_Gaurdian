@@ -55,10 +55,12 @@ const AIGuardianChatDemo = () => {
     scrollToBottom();
   }, [messages]);
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:6000';
+
   // Enhanced safety check using your API
   const checkMessageSafety = async (text: string) => {
     try {
-      const response = await fetch('/api/analyze', {
+      const response = await fetch(`${BASE_URL}/api/analyze`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
