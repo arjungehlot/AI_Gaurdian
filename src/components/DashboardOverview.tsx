@@ -11,7 +11,7 @@ const DashboardOverview = () => {
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-   const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:6000';
+   const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://aiguardian.onrender.com';
 
   // Fetch API data
   useEffect(() => {

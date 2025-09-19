@@ -55,7 +55,7 @@ const AIGuardianChatDemo = () => {
     scrollToBottom();
   }, [messages]);
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:6000';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://aiguardian.onrender.com';
 
   // Enhanced safety check using your API
   const checkMessageSafety = async (text: string) => {
