@@ -16,7 +16,7 @@ const RealTimeMonitoring = () => {
   const [isLive, setIsLive] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:6000';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://aiguardian.onrender.com';
 
   // Fetch queries from API
   const fetchQueries = async () => {
